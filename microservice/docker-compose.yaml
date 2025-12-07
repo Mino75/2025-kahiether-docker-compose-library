@@ -1,1 +1,46 @@
+version: '2.4'
+
+services:
+  kizuna-node:
+    image: mino189/xxxx:latest
+    mem_limit: 256M  
+    cpus: 0.5 
+    user: "1000:1000"  #non root
+    read_only: true    # filesystem root read only
+    tmpfs:
+      - /tmp
+    cap_drop: #drop capabilities
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    security_opt: #no security privilege escalation
+      - no-new-privileges:true 
+    logging: # rotate logs and limit size
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+    restart: unless-stopped  
+    networks:
+      - kizuna-node-network
+      - web
+    labels:  
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:xxx.kahiether.com"
+      - "traefik.docker.network=web"
+      - "traefik.http.services.resizer-node.server.port=3000"
+      - "traefik.frontend.rateLimit.rateSet.rate=10"
+      - "traefik.frontend.rateLimit.rateSet.burst=5"
+networks:
+  kizuna-node-network:
+    name: kizuna-node-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: xxx
+          gateway: xxx
+
+  web:
+    external: true
 
