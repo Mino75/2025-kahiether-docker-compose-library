@@ -1,0 +1,22 @@
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:0.4.5
+    container_name: open-webui-admin
+    mem_limit: 512M
+    cpus: 1
+    restart: unless-stopped
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WEBUI_AUTH=true
+      - ENABLE_SIGNUP=true
+    volumes:
+      - webui_data:/app/backend/data
+    depends_on:
+      - ollama
+    networks:
+      - llm-network
+volumes:
+  webui_data:
+
+networks:
+  llm-network:
+    driver: bridge
