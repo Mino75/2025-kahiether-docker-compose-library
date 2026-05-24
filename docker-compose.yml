@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  test:
+    image: n8nio/n8n:2.6.3  
+    container_name: test
+    restart: unless-stopped
+    mem_limit: 2G
+    cpus: 1.0
+
+    environment:
+      - TZ=Europe/Paris
+
+      - N8N_HOST=test.kahiether.com
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - WEBHOOK_URL=https://test.kahiether.com/
+
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=test
+      - N8N_BASIC_AUTH_PASSWORD=test
+
+      - N8N_ENCRYPTION_KEY=test
+      - N8N_USER_FOLDER=/home/node/.n8n
+
+    networks:
+      - web
+      - test-network
+
+    volumes:
+      - test_data:/home/node/.n8n
