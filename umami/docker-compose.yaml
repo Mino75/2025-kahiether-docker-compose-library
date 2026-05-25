@@ -1,0 +1,55 @@
+version: '2.4'
+services:
+    umami:
+        image: docker.umami.is/umami-software/umami:postgresql-latest
+        mem_limit: 1G  
+        networks : 
+          - web
+          - internal
+        cpus: 1
+        # SECURITY HARDENING:
+        security_opt:
+          - no-new-privileges:true
+       #read_only: true   Prevent filesystem modifications
+        #tmpfs:           Allow writing only to temp directories
+        #  - /tmp
+        #  - /app/.next
+        environment:
+          DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+          DATABASE_TYPE: postgresql
+          APP_SECRET: ${APP_SECRET}
+        depends_on:
+          db :
+            condition: service_healthy
+        restart: always
+        init: true
+        healthcheck:
+          test: ["CMD-SHELL", "curl http://localhost:3000/api/heartbeat"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+
+
+    db:
+        image: postgres:15-alpine
+        environment:
+          POSTGRES_DB: ${POSTGRES_DB}
+          POSTGRES_USER: ${POSTGRES_USER}
+          POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        volumes:
+          - ./umami-db-data:/var/lib/postgresql/data
+        restart: always
+        networks : 
+          - internal
+        healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+          interval: 5s
+          timeout: 5s
+          retries: 5
+
+networks:
+  web:
+    name : web
+    external: true
+  internal:
+    driver: bridge
